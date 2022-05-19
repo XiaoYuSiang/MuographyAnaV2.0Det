@@ -71,7 +71,6 @@ void TestSc(){
     VerticalTracksAna();
     //VerticalTracksAna(c.int indexi=28, c.int indexf=29 )
     
-  }
     /* Straight line Tracking of Event to be ETracks*.txt */
     gROOT->LoadMacro(Form("%sTrackAna.C+",path_Mac));
     TrackAna();
@@ -80,6 +79,7 @@ void TestSc(){
     gROOT->LoadMacro(Form("%sFitTrackResAna.C+",path_Mac));
     FitTrackResAna();
   
+  }
   
   
 }
