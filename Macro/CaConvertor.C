@@ -1,0 +1,240 @@
+#include "TTree.h"
+#include "TFile.h"
+#include <TH1F.h>
+
+#include <sstream>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <typeinfo>
+#include <algorithm>
+#include <vector>
+#if defined (__MAKECINT__) 
+#pragma link C++ class vector<Long64_t>+; 
+#endif
+#include "/home/yusiang/personalLib/Math/UnixTranslator.h"
+#include "path_dir.h"
+#include "AnaVariable.h"
+
+using namespace std;
+using namespace MuoAna_path_dir;
+using namespace MuographAnaVariable;
+
+// C++ program for the above approach
+
+// Unix time is in seconds and
+// Humar Readable Format:
+// DATE:MONTH:YEAR:HOUR:MINUTES:SECONDS,
+// Start of unix time:01 Jan 1970, 00:00:00
+//#include <bits/stdc++.h>
+
+// Function to convert unix time to
+// Human readable format
+
+struct Tmpdata {
+  Int_t     bd;
+  Int_t     ch;
+  Int_t     se;
+  Int_t     pw;
+  Int_t     pc;
+  Long64_t  tc;
+  double    dt;
+
+};
+bool mycompare(Tmpdata  s1, Tmpdata  s2){
+   return s1.dt > s2.dt;
+}
+
+void CaConvertor(TString filename="2021.txt", TString ofile="2021.root") {
+
+  ifstream infile;
+  infile.open(filename);
+  
+  Int_t            frame_= 0 ;
+  Long64_t         unixtime_;
+  Int_t            tYear_;
+  Int_t            tMonth_;
+  Int_t            tDate_;
+  Int_t            tHour_;
+  Int_t            tMinute_;
+  Int_t            tSecond_;
+  Int_t            nHits_;
+  vector<Int_t>      board_;
+  vector<Int_t>      channel_;
+  vector<Int_t>      seq_;
+  vector<double>   dtime_;
+  vector<Int_t>      pcnt_;
+  vector<Long64_t>     tcnt_;
+  vector<Int_t>      pwidth_;
+
+  TFile *f = new TFile(ofile, "recreate");
+
+  TTree *t = new TTree("t", "frame data");
+  t->Branch("frame",    &frame_);     
+  t->Branch("unixtime", &unixtime_);
+  t->Branch("tYear",    &tYear_);
+  t->Branch("tMonth",   &tMonth_);
+  t->Branch("tDate",    &tDate_);
+  t->Branch("tHour",    &tHour_);
+  t->Branch("tMinute",  &tMinute_);
+  t->Branch("tSecond",  &tSecond_);
+  t->Branch("nHits",    &nHits_);
+  t->Branch("board",    &board_);
+  t->Branch("channel",  &channel_);
+  t->Branch("seq",      &seq_);
+  t->Branch("dtime",    &dtime_);
+  t->Branch("pcnt",     &pcnt_);
+  t->Branch("tcnt",     &tcnt_);
+  t->Branch("pwidth",   &pwidth_);     
+
+  nHits_ = 0;
+
+  std::string line;
+  Long64_t tcntB1 = 0,pcntB1 = 0;
+  Tmpdata *data1 = new Tmpdata[200]();
+
+  while (std::getline(infile, line)) {
+
+    std::string s1, s2;
+    Int_t frame;
+    Long64_t unixtime = 0;
+
+    Int_t a=0, board=0, channel=0, seq=0, pcnt=0, pwidth=0;
+    Long64_t tcnt;
+    double dtime;
+
+    std::istringstream iss(line);
+    size_t pos = line.find("Frame");
+
+    if (pos != string::npos) { // the line containing "#Frame"
+
+      if ((iss >> s1 >> frame >> s2 >> unixtime)) { 
+        frame_    = frame;
+        unixtime_ = (Long64_t) unixtime; 
+
+        unixTimeToHumanReadable(unixtime, tYear_, tMonth_, tDate_, tHour_, tMinute_, tSecond_,timeZone);
+        //if (frame_ >= 28588) continue;
+        for(int i0=0;i0<nHits_;i0++){
+          board_   .push_back(data1[i0].bd);
+          channel_ .push_back(data1[i0].ch);
+          seq_     .push_back(data1[i0].se);
+          dtime_   .push_back(data1[i0].dt);
+          pcnt_    .push_back(data1[i0].pc);
+          tcnt_    .push_back(data1[i0].tc);
+          pwidth_  .push_back(data1[i0].pw);
+        }
+        sort(data1, data1+nHits_+1, mycompare);
+        
+        if (nHits_ != 0) t->Fill();
+        
+        nHits_ = 0;
+        delete[] data1;
+        //cout<<"     "<<endl;
+        data1 = new Tmpdata[200]();
+        board_.clear();
+        channel_.clear();
+        seq_.clear();
+        dtime_.clear();
+        pcnt_.clear();
+        tcnt_.clear();
+        pwidth_.clear();
+        //cout<<s1<<" "<<frame<<" "<<s2<<" "<<unixtime<<endl;
+      } else {
+        cout<<"Warning : a bad line!! "<<line<<endl;
+      }
+
+    } else {
+      //if (frame_ >= 28588) continue;
+      if ((iss >> a >> board >> channel >> seq >> dtime >> pcnt >> tcnt >> pwidth)) {
+        if(board==1||pcntB1==0){
+          tcntB1 = tcnt;
+          pcntB1 = pcnt;
+        }else if(pcnt<pcntB1){
+          pcnt = pcntB1;
+          if(tcnt>2.56E+9) {
+            pcnt++;
+            tcnt-=2.56E+9;
+            cout<<"gan"<<endl;
+          }else if(tcntB1>2.E+9&&tcnt<1.E+9){
+            pcnt++;
+            pcntB1 = pcnt;
+          }
+          dtime=pcnt*1.+(1.*tcnt)/2.56E+9;
+          if(tcnt>2.56E+9)cout<<pcnt<<"/"<<pcntB1<<" "<<Form("%.11f",dtime)<<"Coa"<<"\n";
+
+          //cout<<pcnt<<"/"<<pcntB1<<" "<<Form("%.11f",dtime)<<"\n";
+        }
+
+        data1[nHits_].bd = board;
+        data1[nHits_].ch = channel;
+        data1[nHits_].se = seq;
+        data1[nHits_].dt = dtime;
+        data1[nHits_].pc = pcnt;
+        data1[nHits_].tc = tcnt;
+        data1[nHits_].pw = pwidth;
+        nHits_++;
+        //cout<<nHits_<<" "<<a<<" "<<board<<" "<<channel<<" "<<seq<<" "<<dtime<<" "<<pcnt<<" "<<tcnt<<" "<<pwidth<<endl;
+      } else {
+        cout<<"Warning : a bad line!! "<<line<<endl;
+      }
+      
+    }
+
+  }
+
+  t->Fill();
+  f->Write();
+  f->Close();
+  
+}
+
+void MuoCaConvertor(){
+  char path_txts[180], path_filetxt[180], path_fileroot[180], name_fileroot[180];
+  sprintf(path_txts,"%sDataTxtNameAna.dat",DirOperate);
+  ifstream intxtfile(path_txts);
+
+  int Fnum=0;
+  for(; intxtfile>>path_filetxt;Fnum++){
+    
+    for(int ic = 0 ; ic<180 ; ic++){
+      if(path_filetxt[ic]-DirRawData[ic]!=0){
+        for(int icst = ic ; icst<180 ; icst++){
+          if(path_filetxt[icst]=='.'){
+            //cout<<"pos "<<ic<<" in string"<<path_filetxt<<endl;
+            for(int icrt = ic;icrt<icst;icrt++){
+              name_fileroot[icrt-ic] = path_filetxt[icrt];
+              // cout<<path_filetxt[icrt];
+            }
+            // cout<<"string: root path:  "<<path_fileroot<<endl;
+            sprintf(path_fileroot,"%s%s.root",DirRotfile,name_fileroot);
+            // cout<<"string: root path:  "<<path_fileroot<<endl;
+            cout<<"Converting : "<<path_filetxt<<endl;
+            CaConvertor(path_filetxt,path_fileroot);
+            cout<<"root file  : "<<path_fileroot<<endl;
+            break;
+          }
+        }
+        
+        break;
+      }
+      
+    }
+    // cout<<name[Fnum]<<endl;
+    
+  }
+  
+  // sprintf(path_target,"%s%s",DirRotfile,NameChara);
+  // cout<<"finding raw .root:  "<<NameChara<<" file under dir:  "<<DirRotfile<<endl;
+  // cout<<Fnum<<endl;
+  // char name_Save[230][30];
+  // char name_Read[230][30];
+  // gROOT->LoadMacro("CaConvertor.C+");
+  
+  // for(int i= 0; i<Fnum; i++){
+    // sprintf(name_Read[i], "%s%s.txt",path,name[i]);
+    // sprintf(name_Save[i], "%s%s.root",spath,name[i]);
+    // cout<<"Read txt file:  "<<name_Read[i]<<endl;
+    // 
+    // cout<<"Save root file: "<<name_Save[i]<<endl;
+  // }
+}
