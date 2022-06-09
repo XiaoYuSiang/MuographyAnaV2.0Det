@@ -15,7 +15,6 @@
 #include "TF2.h"
 #include "TExec.h"
 #include "/home/yusiang/personalLib/RootFile/untuplizerv8_YuSiang.h"
-#include "/home/yusiang/personalLib/Math/UnixTranslator.h"
 #include "AnaVariable.h"
 #include "GobelFunctions.h"
 #include "path_dir.h"
@@ -90,7 +89,7 @@ void DayEAnaV2() {
     channel   = data.GetPtrInt("channel");
     nHits     = data.GetInt("nHits");
     XBins     = (t1-StartBinUnixt)/600.;
-    if(iev%10000==0) cout<<XBins<<endl;
+    // if(iev%10000==0) cout<<XBins<<endl;
     for(int iHit = 0; iHit<nHits ; iHit++){
       htmp->Fill(XBins,board[iHit]);
       htmpc->Fill(XBins,(board[iHit]-1)*16+channel[iHit]);
@@ -121,6 +120,7 @@ void DayEAnaV2() {
   c1->cd();
   htmpc->Draw("colz");
   c1->Print(Form("%shtmpc%scom.png",DirRes_DayEff,TimeStr));//@@
+  c1->Print(Form("%shtmpc%scom.pdf",DirRes_DayEff,TimeStr));//@@
 
 
   for (int i1=1;i1<nd1day;i1++){
@@ -158,17 +158,6 @@ void DayEAnaV2() {
   hBT->GetZaxis()->SetLabelOffset(0.003);
   hBT->GetZaxis()->SetTitleSize(0.04);
   hBT->GetYaxis()->SetTitleSize(0.04);
-  
-  hCT->SetStats(0);
-  hCT->GetXaxis()->SetTitle("Date");
-  hCT->GetYaxis()->SetTitle("Readout Channel");
-  hCT->GetXaxis()->SetTitleOffset(1.1);
-  hCT->GetYaxis()->SetTitleOffset(1.3);
-  hCT->GetZaxis()->SetLabelOffset(0.003);
-  hCT->GetXaxis()->SetLabelOffset(0.002);
-  hCT->GetZaxis()->SetTitleSize(0.04);
-  hCT->GetYaxis()->SetTitleSize(0.04);
-  
   hBT->GetZaxis()->SetTitle("Data collection efficiency");
   hBT->GetZaxis()->RotateTitle(true);
   hBT->GetZaxis()->SetLabelSize(0.025);
@@ -177,10 +166,20 @@ void DayEAnaV2() {
   hBT->GetXaxis()->SetRangeUser(Dayi,Dayf);
   hBT->GetZaxis()->SetRangeUser(0,1);
   hBT->GetZaxis()->SetNdivisions(-005);
+  
+  hCT->SetStats(0);
+  hCT->GetXaxis()->SetTitle("Date");
+  hCT->GetYaxis()->SetTitle("Readout Channel");
+  hCT->GetXaxis()->SetTitleOffset(1.5);
+  hCT->GetYaxis()->SetTitleOffset(1.3);
+  hCT->GetZaxis()->SetLabelOffset(0.003);
+  hCT->GetXaxis()->SetLabelOffset(0.002);
+  hCT->GetZaxis()->SetTitleSize(0.04);
+  hCT->GetYaxis()->SetTitleSize(0.04);
   hCT->GetZaxis()->SetTitle("Data collection efficiency");
   hCT->GetZaxis()->RotateTitle(true);
   hCT->GetZaxis()->SetLabelSize(0.025);
-  hCT->GetXaxis()->SetLabelSize(0.04);
+  hCT->GetXaxis()->SetLabelSize(0.025);
   hCT->GetYaxis()->SetLabelSize(0.025);
   hCT->GetXaxis()->SetNdivisions(-ndivise+2);
   hCT->GetXaxis()->SetRangeUser(Dayi,Dayf);

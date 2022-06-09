@@ -14,9 +14,8 @@
 #include <TStyle.h>
 #include <TPaveStats.h>
 #include <THStack.h>
+#include "/home/yusiang/personalLib/Style/tdrstyle.h"
 #include "/home/yusiang/personalLib/RootFile/untuplizerv8_YuSiang.h"
-#include "/home/yusiang/personalLib/Math/UnixTranslator.h"
-#include "/home/yusiang/personalLib/RPU/DBMTH2F.h"
 #include "AnaVariable.h"
 #include "GobelFunctions.h"
 #include "path_dir.h"
@@ -29,18 +28,18 @@ using namespace MuographAnaVariable;
 using namespace MuographGobelFuns;
 using namespace DataConst;
 
-void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false,bool editMode=false ) {
+void MuonElectronID( const bool*OperMode, const int indexi=28, const int indexf=29 ) {
+  bool testMode     = OperMode[0];
+  bool rootFileMode = OperMode[4];
+  setTDRStyle();
   double eventGap[46]={};
   char TestMarker[10]={};
   if(testMode) sprintf(TestMarker,Form("%s","TST_"));
   char DirResultPwVCase[150]={};//save path graph of Pwidth Rate
   sprintf(DirResultPwVCase,Form("%s%sBoardPwVCase/",DirResult,TestMarker));
   if (system(Form("mkdir -p %s",DirResultPwVCase))!=0) system(Form("mkdir -p %s",DirResultPwVCase));
-  /*
-  colorArr[0]=1;
-  for(int i=1;i<16;i++){
-    if(i<12) colorArr[i]={1,208,207,152,206,205,212,211,210,209,58};
-  }*/
+
+
   for(int i0=indexi;i0<indexf;i0++){
     eventGap[i0] = (1.0*eventGapTcnt[i0])/2560000000.;
     TFile *rotfile ;
@@ -49,31 +48,20 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
     cout<<Form("%sGapT%s",DirOperate,RFNStr)<<endl; //@@@ name by DSLAna
     TreeReader data(Form("%sGapT%s",DirOperate,RFNStr));
     cout<<Form("%sGapT%s",DirOperate,RFNStr)<<" is opened"<<endl;
-    if(editMode){
-      rotfile = new TFile(Form("%s%sEventsGT%s.root",DirOperate,TestMarker,RFNStr),"RECREATE");
+    if(rootFileMode){
+      rotfile = new TFile(Form("%s%sEventsGT%s",DirOperate,TestMarker,RFNStr),"RECREATE");
     }else{
-      rotfile =     TFile::Open(Form("%s%sEventsGT%s.root",DirOperate,TestMarker,RFNStr));
+      rotfile =     TFile::Open(Form("%s%sEventsGT%s",DirOperate,TestMarker,RFNStr));
     }
-    cout<<Form("%s%sEventsGT%s.root",DirOperate,TestMarker,RFNStr)<<" is opened"<<endl;
+    cout<<Form("%s%sEventsGT%s",DirOperate,TestMarker,RFNStr)<<" is opened"<<endl;
     
 
-    if(editMode){
-      //DSLData();
-      //DataConst DC={};
-      // DSLDataInitialize();
+    if(rootFileMode){
+      
       //Data Variable
       //new Tree unit and odl tree unit
       
       Int_t      TrackIndex=0;
-      // Int_t      frame_   ;
-      // Int_t      EvIndex_ ;
-      // Long64_t   unixtime_;
-      // Int_t      tYear_   ;
-      // Int_t      tMonth_  ;
-      // Int_t      tDate_   ;
-      // Int_t      tHour_   ;
-      // Int_t      tMinute_ ;
-      // Int_t      tSecond_ ;
       Int_t      nLayers_ ;
       Int_t      iHit_;
       Int_t      eventHit_;
@@ -107,15 +95,7 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
       
       TTree *tree = new TTree("t","data from analyzing file");
       tree->Branch("TrackIndex",&TrackIndex);
-      // tree->Branch("frame",&frame_);
-      // tree->Branch("EvIndex",&EvIndex_);
-      // tree->Branch("unixtime",&unixtime_);
-      // tree->Branch("tYear",&tYear_);
-      // tree->Branch("tMonth",&tMonth_);
-      // tree->Branch("tDate",&tDate_);
-      // tree->Branch("tHour",&tHour_);
-      // tree->Branch("tMinute",&tMinute_);
-      // tree->Branch("tSecond",&tSecond_);
+      
       tree->Branch("nLayers",&nLayers_);
       // tree->Branch("pcnt",&pcnt);//@@
       tree->Branch("ElectronID",&ElectronID);
@@ -144,29 +124,21 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
       tree->Branch("nH3",&nH3);
       
       //take time and set anlyze Constant for boundry condition
-      Long64_t evs = data.GetEntriesFast();
-      cout <<"total event:\t"<<evs<<endl;
+      Long64_t evsID = data.GetEntriesFast();
+      cout <<"total event:\t"<<evsID<<endl;
       data.GetEntry(0);
       //DC.OOL=3;//@@
 
       //data hist create
       int ct3=0 ,ct4 = 0;
       int N3 = 0, N2 = 0;
-      if(testMode) evs = 100001;
-      cout<<"evs     "<<evs<<endl;
+      if(testMode) evsID = 100001;
+      cout<<"evsID     "<<evsID<<endl;
       //Fill the data
-      for (Long64_t ev = 0; ev <evs; ++ev) {//evs; ++ev) {
+      for (Long64_t ev = 0; ev <evsID; ++ev) {//evsID; ++ev) {
         data.GetEntry(ev);
-        if(ev%1000 == 0) cout<<Form("\r%.5f%%",(ev*100.)/(1.*evs))<<flush;
-        // frame_    = data.GetInt("frame");
-        // EvIndex_  = data.GetInt("EvIndex");
-        // unixtime_ = data.GetLong64("unixtime");
-        // tYear_    = data.GetInt("tYear");
-        // tMonth_   = data.GetInt("tMonth");
-        // tDate_    = data.GetInt("tDate");
-        // tHour_    = data.GetInt("tHour");
-        // tMinute_  = data.GetInt("tMinute");
-        // tSecond_  = data.GetInt("tSecond");
+        if(ev%1000 == 0) cout<<Form("\r%.5f%%",(ev*100.)/(1.*evsID))<<flush;
+        
         nLayers_  = data.GetInt("nLayers");
         nH        = data.GetInt("nH");
         nH0       = data.GetInt("nH0");
@@ -233,13 +205,7 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
           }
           pwidth.push_back(pwidth_[i2]);
           pwidthScaleFactor.push_back(BDPwWei[BDcheck(board_[i2])]);
-          //pcnt.push_back(pcnt_[i2]);
-          // tcnt.push_back(tcnt_[i2]);
-          // dtime.push_back(dtime_[i2]);
-          //dtime.push_back(dtime_[i2]);
-          //cout<<"aaaaa"<<endl;
-          // cout<<pwidth_[i2]<<endl;
-          // cout<<pwidth[i2]<<endl;
+          
         }
          // cout<<ev<<"!"<<endl;
         //cout<<"push_back"<<endl;
@@ -266,7 +232,7 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
     rotfile->Write();
     cout<<"\r"<<"Finished Ntuple write"<<endl;
     rotfile->Close();
-    TFile *rotfile_0 = TFile::Open(Form("%s%sEventsGT%d_Time20211223_20220106_NL%dNl%d.root",DirOperate,TestMarker,eventGapTcnt[i0],TriggerS,TriggerL));
+    TFile *rotfile_0 = TFile::Open(Form("%s%sEventsGT%s",DirOperate,TestMarker,RFNStr));
     //cout<<"No ERR  new TH1F"<<endl;
     TTree *tf = (TTree*) rotfile_0 ->Get("t");
     TH1F *hPwidth       = new TH1F("hPwidth"      ,"hPwidth"      ,180,0,180);
@@ -351,12 +317,15 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
     ofstream out(Form("%sCaseNumber_TG%d.txt",DirOperate,eventGapTcnt[i0]));
 
     for(int i=0;i<11;i++){
+      hPwidthCases[i]->SetTitle("");
       hPwidthCases[i]->GetXaxis()->SetTitle("Scale Normalized pwidth(100ns)");
       hPwidthCases[i]->GetYaxis()->SetTitle("Hits Number");
       hPwidthCases[i]->GetXaxis()->SetRangeUser(-10,90);
+      hPwidthCases[i]->SetStats(0);
     }
     double BinMaxD[2] = {};
     int    BinMaxI[2] = {};
+    
     for(int inn=0;inn<2;inn++){
       double binmaxtem = 0;
       //cout<<"----INN----"<<inn<<endl;
@@ -389,10 +358,11 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
       for(int i=1;i<3;i++){
         cpwvcase->cd(i);
         hPwidthCases[0+inn*6]->Draw("hist");
+        
         for(int i1=1+inn*6;i1<11;i1++) hPwidthCases[i1]->Draw("histsame");
         hPwidthCases[0+inn*6]->Draw("histsame");
         if(inn==0) LpwWN->Draw("same");
-        if(inn==1) LpwNN->Draw("same");
+        LpwNN->Draw("same");
       }
       cpwvcase->Print(Form("%sPwidthVSCaseTG%d%s.pdf",DirResultPwVCase,eventGapTcnt[i0],WNNN[inn]));
     }
@@ -404,7 +374,7 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
         for(int i1=1+inn*6;i1<11;i1++) hPwidthCasesNor[i1]->Draw("histsame");
         hPwidthCasesNor[inn*6]->Draw("histsame");
         if(inn==0) LpwWN->Draw("same");
-        if(inn==1) LpwNN->Draw("same");
+        LpwNN->Draw("same");
         hPwidthCasesNor[inn*6]->GetXaxis()->SetRangeUser(0,60);
         hPwidthCasesNor[inn*6]->GetYaxis()->SetRangeUser(0,0.15);
         hPwidthCasesNor[inn*6]->GetYaxis()->SetTitle("Hits Number Ratio");
@@ -440,7 +410,12 @@ void MuonElectronID(const int indexi=28, const int indexf=29,bool testMode=false
   }
 
 }
-void IDCaseNumAna(const int indexi=28, const int indexf=29,bool testMode=false/*,bool editMode=false*/ ) {
+
+
+
+
+void IDCaseNumAna( const bool*OperMode, const int indexi=28, const int indexf=29) {
+  bool testMode     = OperMode[0];
   double eventGap[46]={};
 
   char TestMarker[10]={};
@@ -452,12 +427,14 @@ void IDCaseNumAna(const int indexi=28, const int indexf=29,bool testMode=false/*
   for(int i0=indexi;i0<indexf;i0++){
     eventGap[i0] = (1.0*eventGapTcnt[i0])/2560000000.;
     TFile *rotfile ;
-    // if(editMode){
+    char RFNStr[200];
+    sprintf(RFNStr,"%d_%s_nHTH%dL%d.root",eventGapTcnt[i0],TimeStr,TriggerS,TriggerL);
+    // if(rootFileMode){
       // rotfile = new TFile(Form("%s%sEventsGT%d_Time20211223_20220106_NL%dNl%d.root",DirOperate,TestMarker,eventGapTcnt[i0],TriggerS,TriggerL),"RECREATE");
     // }else{
-      rotfile =     TFile::Open(Form("%s%sEventsGT%d_Time20211223_20220106_NL%dNl%d.root",DirOperate,TestMarker,eventGapTcnt[i0],TriggerS,TriggerL));
+      rotfile =     TFile::Open(Form("%s%sEventsGT%s",DirOperate,TestMarker,RFNStr));
     // }
-    cout<<Form("%s%sEventsGT%d_Time20211223_20220106_NL%dNl%d.root",DirOperate,TestMarker,eventGapTcnt[i0],TriggerS,TriggerL)<<" is opened"<<endl;
+    cout<<Form("%s%sEventsGT%s",DirOperate,TestMarker,RFNStr)<<" is opened"<<endl;
     TTree *tf = (TTree*) rotfile ->Get("t");
     TH1F *hCaseID       = new TH1F("hCaseID"      ,"hCaseID"      ,65,0,65);
     TH1F *hCaseIDNoiID  = new TH1F("hCaseIDNoiID" ,"hCaseIDNoiID" ,65,0,65);

@@ -12,7 +12,6 @@
 #if defined (__MAKECINT__) 
 #pragma link C++ class vector<Long64_t>+; 
 #endif
-#include "/home/yusiang/personalLib/Math/UnixTranslator.h"
 #include "path_dir.h"
 #include "AnaVariable.h"
 
@@ -189,20 +188,21 @@ void CaConvertor(TString filename="2021.txt", TString ofile="2021.root") {
 }
 
 void MuoCaConvertor(){
-  char path_txts[180], path_filetxt[180], path_fileroot[180], name_fileroot[180];
+  char path_txts[180], path_filetxt[180];
   sprintf(path_txts,"%sDataTxtNameAna.dat",DirOperate);
   ifstream intxtfile(path_txts);
 
   int Fnum=0;
   for(; intxtfile>>path_filetxt;Fnum++){
-    
+    char path_fileroot[180], name_fileroot[180];
     for(int ic = 0 ; ic<180 ; ic++){
       if(path_filetxt[ic]-DirRawData[ic]!=0){
         for(int icst = ic ; icst<180 ; icst++){
           if(path_filetxt[icst]=='.'){
             //cout<<"pos "<<ic<<" in string"<<path_filetxt<<endl;
-            for(int icrt = ic;icrt<icst;icrt++){
-              name_fileroot[icrt-ic] = path_filetxt[icrt];
+            for(int icrt = ic;icrt<180;icrt++){
+              if(icrt<icst) name_fileroot[icrt-ic] = path_filetxt[icrt];
+              if(icrt>=icst) name_fileroot[icrt-ic] = 0;
               // cout<<path_filetxt[icrt];
             }
             // cout<<"string: root path:  "<<path_fileroot<<endl;

@@ -14,7 +14,6 @@
 #include <TStyle.h>
 #include <TPaveStats.h>
 #include "/home/yusiang/personalLib/RootFile/untuplizerv8_YuSiang.h"
-#include "/home/yusiang/MuographyAna/lineFit3D.h"
 #include "AnaVariable.h"
 #include "GobelFunctions.h"
 #include "path_dir.h"
@@ -29,7 +28,7 @@ using namespace DataConst;
 
 //channel vs rate combine
 
-void TrackAna(const int indexi=28, const int indexf=29, const bool testMode="false" ) {
+void TrackAna(const int indexi=28, const int indexf=29, const bool testMode=false ) {
   double eventGap[46]={};
   //Printf("Files found: %i", (int) files.size());
   //ofstream out(Form("%sSEVertical4v3.dat",DirOperate));
@@ -73,7 +72,7 @@ void TrackAna(const int indexi=28, const int indexf=29, const bool testMode="fal
     vector<Double_t> pX;
     vector<Double_t> pY;
     vector<Double_t> pZ;
-    vector<Int_t>    pwidth;
+    vector<Int_t>    pwidth,pwidth0,pwidth1,pwidth2,pwidth3;
     vector<Int_t>    pwidthScaleFactor;
     vector<Int_t>    pcnt;
     vector<Long64_t> tcnt;
@@ -115,20 +114,24 @@ void TrackAna(const int indexi=28, const int indexf=29, const bool testMode="fal
     tree->Branch("pY",&pY);
     tree->Branch("pZ",&pZ);
     tree->Branch("pwidth",&pwidth);
+    tree->Branch("pwidth0",&pwidth0);
+    tree->Branch("pwidth1",&pwidth1);
+    tree->Branch("pwidth2",&pwidth2);
+    tree->Branch("pwidth3",&pwidth3);
     tree->Branch("pwidthScaleFactor",&pwidthScaleFactor);
     tree->Branch("pcnt",&pcnt);
     tree->Branch("tcnt",&tcnt);
     tree->Branch("dtime",&dtime);
     
     //take time and set anlyze Constant for boundry condition
-    Long64_t evs = data.GetEntriesFast();
-    cout <<"total event:\t"<<evs<<endl;
+    Long64_t evsTr = data.GetEntriesFast();
+    cout <<"total event:\t"<<evsTr<<endl;
     data.GetEntry(0);
-    if(testMode) evs = evs*0.01;
+    if(testMode) evsTr = evsTr*0.01;
     //Fill the data
-    for (Long64_t ev = 0; ev <evs; ++ev) {//evs; ++ev) {
+    for (Long64_t ev = 0; ev <evsTr; ++ev) {//evsTr; ++ev) {
       data.GetEntry(ev);
-      if(ev%1000 == 0) cout<<Form("\r%.5f%%",(ev*100.)/(1.*evs))<<flush;
+      if(ev%1000 == 0) cout<<Form("\r%.5f%%",(ev*100.)/(1.*evsTr))<<flush;
       nH        = data.GetInt("nH");
       if(nH<3) continue;
       if(nH>9) continue;
@@ -188,15 +191,23 @@ void TrackAna(const int indexi=28, const int indexf=29, const bool testMode="fal
         
         for(int iHit=0 ; iHit<nH ; iHit++){
           pwidth.push_back(pwidth_[iHit]);
+          if     (BDcheck(board_[iHit])==0) pwidth0.push_back(pwidth_[iHit]);
+          else if(BDcheck(board_[iHit])==1) pwidth1.push_back(pwidth_[iHit]);
+          else if(BDcheck(board_[iHit])==2) pwidth2.push_back(pwidth_[iHit]);
+          else if(BDcheck(board_[iHit])==3) pwidth3.push_back(pwidth_[iHit]);
           pwidthScaleFactor.push_back(pwidthScaleFactor_[iHit]);
           pcnt.push_back(pcnt_[iHit]);
           tcnt.push_back(tcnt_[iHit]);
           dtime.push_back(dtime_[iHit]);
         }
-        
+        // cout<<"HR: "<<tHour_<<endl;
         tree->Fill();
 
         pwidth.clear();
+        pwidth0.clear();
+        pwidth1.clear();
+        pwidth2.clear();
+        pwidth3.clear();
         pwidthScaleFactor.clear();
         pcnt.clear();
         tcnt.clear();

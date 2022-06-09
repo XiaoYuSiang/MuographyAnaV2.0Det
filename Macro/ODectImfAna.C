@@ -13,7 +13,6 @@
 #include "DSLData.h"
 #include "AnaVariable.h"
 #include "GobelFunctions.h"
-#include "lineFit3D.h"
 #include "path_dir.h"
 using namespace std;
 using namespace DBMMath;

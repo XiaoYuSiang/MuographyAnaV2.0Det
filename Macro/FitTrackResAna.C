@@ -16,12 +16,7 @@ using namespace MuographAnaVariable;
 using namespace MuographGobelFuns;
 using namespace MuoAna_path_dir;
 using namespace DataConst;
-void FastStyleStats(float boundaryX,float boundaryY){
-  gStyle-> SetStatX(boundaryX);
-  gStyle-> SetStatY(boundaryY);
-  gStyle-> SetStatW(0.2);
-  gStyle-> SetStatH(0.1); 
-}
+
 void txtDefault(float px, float py, const char* content, double size, int rotateD, TCanvas *c1){
   c1->cd();
   TText *txt = new TText(px,py,content);
@@ -153,6 +148,8 @@ void  FitTrackResAna(){
     TDDD->GetZaxis()->SetTitleOffset(1.4);
     TDDD->GetZaxis()->RotateTitle(true);
     C->Print(Form("%sDxDzVSDyDz.pdf",DirSave));
+    C->Print(Form("%sDxDzVSDyDz.png",DirSave));
+    
     
     
   }

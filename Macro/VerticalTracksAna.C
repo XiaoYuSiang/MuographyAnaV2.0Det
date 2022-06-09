@@ -14,7 +14,6 @@
 #include <TStyle.h>
 #include <TPaveStats.h>
 #include "/home/yusiang/personalLib/RootFile/untuplizerv8_YuSiang.h"
-#include "/home/yusiang/personalLib/Math/UnixTranslator.h"
 #include "AnaVariable.h"
 #include "GobelFunctions.h"
 #include "path_dir.h"
@@ -112,8 +111,8 @@ void VerticalTracksAna(const int indexi=28, const int indexf=29 ) {
     tree->Branch("dtime",&dtime);
     
     //take time and set anlyze Constant for boundry condition
-    Long64_t evs = data.GetEntriesFast();
-    cout <<"total event:\t"<<evs<<endl;
+    Long64_t evsVT = data.GetEntriesFast();
+    cout <<"total event:\t"<<evsVT<<endl;
     data.GetEntry(0);
     //OOL=3;//@@
 
@@ -135,12 +134,12 @@ void VerticalTracksAna(const int indexi=28, const int indexf=29 ) {
     int ct3=0 ,ct4 = 0;
     int N3 = 0, N2 = 0;
     //Fill the data
-    for (Long64_t ev = 0; ev <evs; ++ev) {//evs; ++ev) {
+    for (Long64_t ev = 0; ev <evsVT; ++ev) {//evsVT; ++ev) {
       data.GetEntry(ev);
       frame_    = data.GetInt("frame");
       EvIndex_  = data.GetInt("EvIndex");
       unixtime_ = data.GetLong64("unixtime");
-      if(ev%1000 == 0) cout<<Form("\r%.5f%%\t%d",(ev*100.)/(1.*evs),unixtime_)<<flush;
+      if(ev%1000 == 0) cout<<Form("\r%.5f%%\t%d",(ev*100.)/(1.*evsVT),unixtime_)<<flush;
       tYear_    = data.GetInt("tYear");
       tMonth_   = data.GetInt("tMonth");
       tDate_    = data.GetInt("tDate");
@@ -356,6 +355,7 @@ void VerticalTracksAna(const int indexi=28, const int indexf=29 ) {
     cout<<numX354<<"\t";
     cout<<num135X<<"\n";
     
+    rotfile->Close();
   
 
   }

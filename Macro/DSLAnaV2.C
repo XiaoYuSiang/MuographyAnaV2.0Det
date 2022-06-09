@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <TStyle.h>
 #include "/home/yusiang/personalLib/RootFile/untuplizerv8_YuSiang.h"
-#include "/home/yusiang/personalLib/Math/UnixTranslator.h"
 #include "path_dir.h"
 #include "AnaVariable.h"
 #include "GobelFunctions.h"
@@ -65,11 +64,16 @@ void DSLAnaV2() {
   Int_t Secf         = timefT.ts;
   cout <<"unixtimef:\t"<<unixtimef<<endl;
   char  TimeStr[20];
+  char  TimeStrTitle[50];
   sprintf(TimeStr,"S%04d%02d%02dE%04d%02d%02d",Yeari,Moni,Dayi,Yearf,Monf,Dayf);
+  sprintf(TimeStrTitle,
+          "Date From % 04d/%02d/%02d to %04d/%02d/%02d",Yeari,Moni,Dayi,Yearf,Monf,Dayf);
   /*     Example      sprintf(StatrStr,"SYYYYMMSSEYYYYMMSS")*/
   cout <<"dt:\t"<<unixtimef-unixtimei<<"\t"<<"dday:\t"<<Form("%.2f",(unixtimef-unixtimei)/86400.)<<endl;
   cout<<"TimeStr:    "<<TimeStr<<endl;
   out<<"TimeStr:    "<<TimeStr<<endl;
+  cout<<"TimeStrTitle:    "<<TimeStrTitle<<endl;
+  out<<"TimeStrTitle:    "<<TimeStrTitle<<endl;
   Int_t dday = (unixtimef-unixtimei)/86400 + 1;
   Int_t ndivise = dday;
   Int_t OOL=0;//OrderOfLabel
@@ -85,6 +89,7 @@ void DSLAnaV2() {
   Int_t BinOnTime    = int((unixtimef-unixtimei)/th2fbinwidth);
   Int_t FirDaySec    = unixtimei-Seci-Mini*60-Houri*3600;
   Int_t FinDaySec    = unixtimef-Secf-Minf*60-Hourf*3600+86400;
+  Int_t BinOnTimeD   = int((FinDaySec-FirDaySec)/th2fbinwidth);
 
   Int_t yetSec       = 86400-Seci-Mini*60-Houri*3600;
   Int_t yetTimeBin   = int(yetSec/th2fbinwidth);
@@ -171,7 +176,8 @@ void DSLAnaV2() {
   outh<<"{"<<endl;
   outh<<""<<endl;
   outh<<"  /*Time string which can use on file name*/"<<endl;
-  outh<<"  const char     TimeStr[25]= \""<< TimeStr   <<"\";\n";
+  outh<<"  const char     TimeStr[25]     = \""<< TimeStr     <<"\";\n";
+  outh<<"  const char     TimeStrTitle[50]= \""<< TimeStrTitle<<"\";\n";
   outh<<endl<<"  /*Total Event Numbers Of Input Files*/"<<endl;
   outh<<"  const Long64_t evs        = "<< evs       <<";\n";
   outh<<endl<<"  /*time Information of the first event*/"<<endl;
@@ -196,16 +202,117 @@ void DSLAnaV2() {
   outh<<"  const Int_t    ndivise    = "<< ndivise   <<";\n";
   outh<<"  const Int_t    OOL        = "<< OOL       <<";\n";
   outh<<"  const Int_t    BinOnTime  = "<< BinOnTime <<";\n";
+  outh<<"  const Int_t    BinOnTimeD = "<< BinOnTimeD <<";\n";
   outh<<"  const Int_t    yetSec     = "<< yetSec    <<";\n";
   outh<<"  const Float_t  RateWei    = "<< RateWei   <<";\n";
   outh<<"  "<<endl;
+
+
+
+
+
+
+  outh<<"  void Mod_DateLabel(TH1F* TH1FObj,const char* TitleY=\"TitleY\"){"<<endl;
+  outh<<"    Int_t    unixtime, tYear, tMonth, tDate ,tHour ,tMinute ,tSecond ;"<<endl;
+  outh<<"    "<<endl;
+  outh<<"    TH1FObj->SetStats(0);"<<endl;
+  outh<<"    TH1FObj->GetXaxis()->SetTitle(\"Date\");"<<endl;
+  outh<<"    TH1FObj->GetYaxis()->SetTitle(TitleY);"<<endl;
+  outh<<"    TH1FObj->GetXaxis()->SetTitleOffset(1.5);"<<endl;
+  outh<<"    TH1FObj->GetYaxis()->SetTitleOffset(1.2);"<<endl;
+  outh<<"    TH1FObj->GetXaxis()->SetLabelSize(0.03);"<<endl;
+  outh<<"    TH1FObj->GetYaxis()->SetLabelSize(0.03);"<<endl;
+  outh<<"    TH1FObj->SetMarkerStyle(0);"<<endl;
+  outh<<"    TH1FObj->SetLineColor(0);"<<endl;
+  outh<<"    TH1FObj->SetMarkerColor(0);"<<endl;
+  outh<<"    TH1FObj->GetXaxis()->SetRangeUser(FirDaySec,FinDaySec);"<<endl;
+  outh<<"    TH1FObj->GetXaxis()->SetTickLength(0);"<<endl;
+  outh<<"    "<<endl;
+  outh<<"    for (int i1=0;i1<(ndivise);i1++){"<<endl;
+  outh<<"      unixtime = TH1FObj->GetXaxis()->GetBinCenter(1+i1)-TH1FObj->GetXaxis()->GetBinWidth(1+i1)/2.;"<<endl;
+  outh<<"      unixTimeToHumanReadable(unixtime, tYear, tMonth, tDate, tHour, tMinute, tSecond,timeZone);"<<endl;
+  outh<<"      char str_MD[30] ={};"<<endl;
+  outh<<"      sprintf(str_MD , \"%s-%02.f\",MonthName[tMonth],1.*tDate);"<<endl;
+  outh<<"      if(tDate==1||tDate==15||i1==0||i1==ndivise||(ndivise+1)<32){"<<endl;
+  outh<<"        TH1FObj->GetXaxis()->SetBinLabel(1+i1 ,str_MD);"<<endl;
+  outh<<"      }"<<endl;
+  outh<<"    }"<<endl;
+  outh<<"  }"<<endl;
+  outh<<"  "<<endl;
+  
+  
+  outh<<"  TH1F *Mod_DateLabel(const char* TH1FName=\"Mod_TH1F_UTVYZ\",const char* TH1FTitle=\"\",const float YMin=0, const float YMax=1,const char* TH1FTitleY=\"TitleY\"){"<<endl;
+  outh<<"    TH1F *Mod_TH1F_UTVYZ = new TH1F(TH1FName,TH1FTitle,ndivise,FirDaySec,FinDaySec);"<<endl;
+  outh<<"    Mod_DateLabel(Mod_TH1F_UTVYZ,TH1FTitleY);"<<endl;
+  outh<<"    Mod_TH1F_UTVYZ->GetYaxis()->SetRangeUser(YMin,YMax);"<<endl;
+  outh<<"    return Mod_TH1F_UTVYZ;"<<endl;
+  outh<<"  }"<<endl;
+  
+  
+  outh<<"  void Mod_DateLabel(TH2F* TH2FObj,const char* TitleY=\"TitleY\",const char* TitleZ=\"TitleZ\"){"<<endl;
+  outh<<"    Int_t    unixtime, tYear, tMonth, tDate ,tHour ,tMinute ,tSecond ;"<<endl;
+  outh<<"    TH2FObj->SetStats(0);"<<endl;
+  outh<<"    TH2FObj->GetXaxis()->SetTitle(\"Date\");"<<endl;
+  outh<<"    TH2FObj->GetYaxis()->SetTitle(TitleY);"<<endl;
+  outh<<"    TH2FObj->GetYaxis()->SetTitle(TitleZ);"<<endl;
+  outh<<"    TH2FObj->GetXaxis()->SetTitleOffset(1.5);"<<endl;
+  outh<<"    TH2FObj->GetYaxis()->SetTitleOffset(1.2);"<<endl;
+  outh<<"    TH2FObj->GetZaxis()->SetTitleOffset(1.3);"<<endl;
+  outh<<"    TH2FObj->GetXaxis()->SetLabelSize(0.03);"<<endl;
+  outh<<"    TH2FObj->GetYaxis()->SetLabelSize(0.03);"<<endl;
+  outh<<"    TH2FObj->GetZaxis()->SetLabelSize(0.025);"<<endl;
+  outh<<"    TH2FObj->SetMarkerStyle(0);"<<endl;
+  outh<<"    TH2FObj->SetLineColor(0);"<<endl;
+  outh<<"    TH2FObj->SetMarkerColor(0);"<<endl;
+  outh<<"    TH2FObj->GetXaxis()->SetRangeUser(FirDaySec,FinDaySec);"<<endl;
+  outh<<"    TH2FObj->GetXaxis()->SetTickLength(0);"<<endl;
+  outh<<"    "<<endl;
+  outh<<"    for (int i1=0;i1<(ndivise);i1++){"<<endl;
+  outh<<"      unixtime = TH2FObj->GetXaxis()->GetBinCenter(1+i1)-TH2FObj->GetXaxis()->GetBinWidth(1+i1)/2.;"<<endl;
+  outh<<"      unixTimeToHumanReadable(unixtime, tYear, tMonth, tDate, tHour, tMinute, tSecond,timeZone);"<<endl;
+  outh<<"      char str_MD[30] ={};"<<endl;
+  outh<<"      sprintf(str_MD , \"%s-%02.f\",MonthName[tMonth],1.*tDate);"<<endl;
+  outh<<"      if(tDate==1||tDate==15||i1==0||i1==ndivise||(ndivise+1)<32){"<<endl;
+  outh<<"        TH2FObj->GetXaxis()->SetBinLabel(1+i1 ,str_MD);"<<endl;
+  outh<<"      }"<<endl;
+  outh<<"    }"<<endl;
+  outh<<"  }"<<endl;
+  outh<<""<<endl;
+  
+  outh<<"  TH2F *Mod_DateLabel(const char* TH2FName=\"Mod_TH2F_UTVYVZ\",const char* TH2FTitle=\"\",const int NYBin = 10,const float YMin=0, const float YMax=1,const char* TH2FTitleY=\"TitleY\"){"<<endl;
+  outh<<"    TH2F *Mod_TH2F_UTVYVZ = new TH2F(TH2FName,TH2FTitle,ndivise,FirDaySec,FinDaySec,NYBin,YMin,YMax);"<<endl;
+  outh<<"    Mod_DateLabel(Mod_TH2F_UTVYVZ,TH2FTitleY);"<<endl;
+  outh<<"    Mod_TH2F_UTVYVZ->GetYaxis()->SetRangeUser(YMin,YMax);"<<endl;
+  outh<<"    return Mod_TH2F_UTVYVZ;"<<endl;
+  outh<<"  }"<<endl;
+  
+  
+  outh<<"  TGraphErrors *Mod_DateGrid(const float YMin, const float YMax){"<<endl;
+  outh<<"  "<<endl;
+  outh<<"    TH1F *Mod_TH1F_UTVYZ      = new TH1F(\"Mod_TH1F_UTVYZ\",\"\",ndivise,FirDaySec,FinDaySec);"<<endl;
+  outh<<"    float DGx[ndivise]={},DGy[ndivise]={},DGex[ndivise]={},DGey[ndivise]={};"<<endl;
+  outh<<"    for(int i0=0;i0<ndivise;i0++) {"<<endl;
+  outh<<"      DGx[i0] = Mod_TH1F_UTVYZ->GetBinCenter(i0+1)+Mod_TH1F_UTVYZ->GetBinWidth(i0+1)/2.;"<<endl;
+  outh<<"      DGy[i0] = YMin;  DGey[i0] = fabs(YMax-YMin)*2;  DGex[i0] = 0;"<<endl;
+  outh<<"      // cout<<DGx[i0]<<\"\t\"<<DGy[i0]<<\"\t\"<<DGex[i0]<<\"\t\"<<DGey[i0]<<endl;"<<endl;
+  outh<<"    }"<<endl;
+  outh<<"    TGraphErrors *TDayGrid = new TGraphErrors(ndivise,DGx,DGy,DGex,DGey);"<<endl;
+  outh<<"    TDayGrid->SetLineStyle(3);"<<endl;
+  outh<<"    TDayGrid->SetLineColor(1);"<<endl;
+  outh<<"    TDayGrid->SetMarkerStyle(1);"<<endl;
+  outh<<"    TDayGrid->SetMarkerColor(0);"<<endl;
+  outh<<"    delete Mod_TH1F_UTVYZ;"<<endl;
+  outh<<"    return TDayGrid;"<<endl;
+  outh<<"  }"<<endl;
+  
+  
+  
+  
+  
+  
   outh<<"};"<<endl;
   
-  
   outh.close();
-
-  //data hist create
-
-
-
 }
+
+
