@@ -95,7 +95,7 @@ void DataBaseLocate( const char *path_dirRawData, const char *path_dirHkData, co
   char DirRes_TempVT[170], DirRes_HumiVT[170], DirRes_DayEff[170],DirRes_RatVCh[170],DirRes_RatVSun[170];
   sprintf(DirRes_TempVT  ,"%sTemperatureVsTime/" ,DirResult);
   sprintf(DirRes_HumiVT  ,"%sHumidityVsTime/"    ,DirResult);
-  sprintf(DirRes_DayEff  ,"%sDayEff/"             ,DirResult);
+  sprintf(DirRes_DayEff  ,"%sDayEff/"            ,DirResult);
   sprintf(DirRes_RatVCh  ,"%sRateVsChannel/"     ,DirResult);
   sprintf(DirRes_RatVSun ,"%sRateVsSunnyDay/"    ,DirResult);
   locatedDirbyPath(DirRes_TempVT);
@@ -104,9 +104,11 @@ void DataBaseLocate( const char *path_dirRawData, const char *path_dirHkData, co
   locatedDirbyPath(DirRes_RatVCh);
   locatedDirbyPath(DirRes_RatVSun);
   
-  char DirRes_HKVRat[170];
+  char DirRes_HKVRat[170],DirRes_SeqSkip[170];
   sprintf(DirRes_HKVRat  ,"%sHuoseKeepDatVsRate/",DirResult);
+  sprintf(DirRes_SeqSkip ,"%sSequanceSkip/"      ,DirResult);
   locatedDirbyPath(DirRes_HKVRat);
+  locatedDirbyPath(DirRes_SeqSkip);
   
   
   
@@ -174,6 +176,7 @@ void DataBaseLocate( const char *path_dirRawData, const char *path_dirHkData, co
   outHfile<<Form("  const char %-16.16s[180] = \"%s\";","DirRes_RatVCh" ,DirRes_RatVCh )<<endl;
   outHfile<<Form("  const char %-16.16s[180] = \"%s\";","DirRes_RatVSun",DirRes_RatVSun)<<endl;
   outHfile<<Form("  const char %-16.16s[180] = \"%s\";","DirRes_HKVRat" ,DirRes_HKVRat )<<endl;
+  outHfile<<Form("  const char %-16.16s[180] = \"%s\";","DirRes_SeqSkip",DirRes_SeqSkip )<<endl;
   outHfile<<"  /*  Name marker of raw datas  */"<<endl;
   outHfile<<Form("  const char %-16.16s[50] = \"%s\";","name_Raw_txt"   ,name_Raw_txt  )<<endl;
   outHfile<<Form("  const char %-16.16s[50] = \"%s\";","name_Raw_root"  ,name_Raw_root )<<endl;
@@ -218,6 +221,7 @@ void DataBaseLocate( const char *path_dirRawData, const char *path_dirHkData, co
     cout<<Form("  c.char*    %-16.16s = \"%s","DirRes_RatVCh" ,DirRes_RatVCh )<<endl;
     cout<<Form("  c.char*    %-16.16s = \"%s","DirRes_RatVSun",DirRes_RatVSun)<<endl;
     cout<<Form("  c.char*    %-16.16s = \"%s","DirRes_HKVRat" ,DirRes_HKVRat )<<endl;
+    cout<<Form("  c.char*    %-16.16s = \"%s","DirRes_SeqSkip",DirRes_SeqSkip)<<endl;
     cout<<"  /*  Name marker of raw datas  */"<<endl;
     cout<<Form("  c.char*    %-16.16s = \"%s","name_Raw_txt"  ,name_Raw_txt  )<<endl;
     cout<<Form("  c.char*    %-16.16s = \"%s","name_Raw_root" ,name_Raw_root )<<endl;

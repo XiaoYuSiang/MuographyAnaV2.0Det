@@ -13,9 +13,9 @@ void MainControl(){
   
   
   /* Adjustable Path Variable */
-  const char path_Raw[50] = "/data4/YuSiang/ExampleTestSpace/Data/";
+  const char path_Raw[50] = "/data4/YuSiang/S4_11F_4lay_5deg/";
   //path of the raw data for muon (*_Mu.txt)
-  const char path_Hk [50] = "/data4/YuSiang/ExampleTestSpace/Data/";
+  const char path_Hk [50] = "/data4/YuSiang/S4_11F_4lay_5deg/";
   //path of the raw data for House keeping (*_HK.txt)
   const char path_OpR[50] = "/data4/YuSiang/ExampleTestSpace/Ana/";
   //path of result and operation data
@@ -56,7 +56,7 @@ void MainControl(){
   
   
   bool SkipBlock  = true;//default skip the progress = true
-  bool ReDSLAna   = true;//default skip the progress = true
+  bool ReDSLAna   = true;//default skip the progress = true @@
   /* P.01 */
   /* Copy the AnaVariable.h into path_Mac */
   system(Form("cp AnaVariable.h  %sAnaVariable.h",path_Mac));
@@ -203,8 +203,13 @@ void MainControl(){
     /* Rate Vs house keeping data for Temperature or humidity */
     gROOT->LoadMacro(Form("%sRVHKAna.C+",path_Mac));
     RVHKAna(OperMode);
-  }
     
+    /* P.26 */
+    /* Hit count/sequence skip ana. */
+    gROOT->LoadMacro(Form("%sSeqSkipAna.C+",path_Mac));
+    SeqSkipAna();
+    
+  }
     
     
     
